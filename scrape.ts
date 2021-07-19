@@ -94,11 +94,8 @@ const scrape = async () => {
   await page.waitForSelector(
     `.highcharts-title:has-text('Daily Consumption During ${currentMonthName}')`
   );
-  const title = await page.$(".highcharts-title");
-  console.log(await title?.textContent());
 
-  const subtitle = await page.$(".highcharts-subtitle");
-  console.log(await subtitle?.textContent());
+  console.log(`Daily Consumption During ${currentMonthName}`);
 
   let usage: number[] | undefined = await page.evaluate(
     `chart1.series.find(x => x.name == "Daily Consumption")?.yData.filter(x => x > 0)`
@@ -107,9 +104,12 @@ const scrape = async () => {
   await browser.close();
 
   if (usage === undefined) {
-    console.log("Usage not found.");
     process.exit(1);
   }
+
+  const readingDate = new Date(firstOfMonth);
+  readingDate.setDate(usage.length);
+  console.log(`Reading as of ${readingDate.toLocaleDateString()}`);
 
   // Pad out the array with zeroes
   const paddedUsage = Array.from({
@@ -127,14 +127,17 @@ const scrape = async () => {
 
   const meanSeries = Array(usage.length).fill(stats.mean(usage));
 
+  const plotMax = Math.max(...usage, 20);
+
   const config = {
-    colors: [asciichart.lightyellow, asciichart.lightcyan],
+    colors: [asciichart.lightcyan, asciichart.lightyellow],
     min: 0,
     symbols: SYMBOLS,
     height: 10,
+    max: plotMax,
   };
 
-  const plot = asciichart.plot([paddedUsage, meanSeries], config);
+  const plot = asciichart.plot([meanSeries, paddedUsage], config);
 
   console.log(plot);
 };
