@@ -1,6 +1,6 @@
 import assert from "assert";
 
-import { chromium } from "playwright";
+import { chromium } from "playwright-chromium";
 import dotenv from "dotenv";
 import * as asciichart from "asciichart";
 import * as stats from "simple-statistics";

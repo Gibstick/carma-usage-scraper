@@ -245,10 +245,10 @@ pend@~1.2.0:
   resolved "https://registry.yarnpkg.com/pend/-/pend-1.2.0.tgz#7a57eb550a6783f9115331fcf4663d5c8e007a50"
   integrity sha1-elfrVQpng/kRUzH89GY9XI4AelA=
 
-playwright@^1.12.3:
+playwright-chromium@^1.12.3:
   version "1.12.3"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.12.3.tgz#113afa2cba10fb56e9a5b307377343e32a155a99"
-  integrity sha512-eyhHvZV7dMAUltqjQsgJ9CjZM8dznzN1+rcfCI6W6lfQ7IlPvTFGLuKOCcI4ETbjfbxqaS5FKIkb1WDDzq2Nww==
+  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.12.3.tgz#fd8fe42a83b2bbaf616b01615e412f26cdc65859"
+  integrity sha512-YshYiT/ikEUNGU76lZu4qcfJscERo1257bS1dU1VcBZvz3xNMD2fO25vVOiDEbuYYntLcnj9lW6Qy1UpWSC+VA==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
