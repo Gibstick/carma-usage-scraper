@@ -1,0 +1,10 @@
+{
+    "extends": "@tsconfig/node14/tsconfig.json",
+    "include": [
+        "scrape.ts"
+    ],
+    "compilerOptions": {
+        "noImplicitReturns": true,
+        "noUnusedLocals": true
+    },
+}
