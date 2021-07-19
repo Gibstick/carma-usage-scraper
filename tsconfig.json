@@ -1,10 +1,14 @@
 {
     "extends": "@tsconfig/node14/tsconfig.json",
-    "include": [
+    "files": [
+        "decs.d.ts",
         "scrape.ts"
     ],
     "compilerOptions": {
         "noImplicitReturns": true,
         "noUnusedLocals": true
     },
+    "ts-node": {
+        "files": true,
+    }
 }

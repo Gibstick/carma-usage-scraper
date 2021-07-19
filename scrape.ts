@@ -4,6 +4,7 @@ import { chromium } from "playwright";
 import dotenv from "dotenv";
 import * as asciichart from "asciichart";
 import * as stats from "simple-statistics";
+import AsciiTable from "ascii-table";
 
 const START_URL =
   "http://www.carmasmartmetering.com/DirectConsumptionDev/login.aspx";
@@ -125,7 +126,8 @@ const scrape = async () => {
     series[i] = [dates[i].toISOString(), usage[i]];
   }
 
-  const meanSeries = Array(usage.length).fill(stats.mean(usage));
+  const mean = stats.mean(usage);
+  const meanSeries = Array(usage.length).fill(mean);
 
   const plotMax = Math.max(...usage, 20);
 
@@ -140,6 +142,19 @@ const scrape = async () => {
   const plot = asciichart.plot([meanSeries, paddedUsage], config);
 
   console.log(plot);
+
+  const max = stats.max(usage);
+  const min = stats.min(usage);
+  const stdDev = stats.standardDeviation(usage);
+
+  const table = new AsciiTable();
+  table.removeBorder();
+  table.addRow("latest", `${usage[usage.length - 1]}`);
+  table.addRow("max", max.toFixed(2));
+  table.addRow("min", min.toFixed(2));
+  table.addRow("stddev", stdDev.toFixed(2));
+
+  console.log(table.toString());
 };
 
 (async () => {

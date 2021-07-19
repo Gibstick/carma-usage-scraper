@@ -1,3 +1,4 @@
 .env
 *.tsv
 node_modules
+*.js
