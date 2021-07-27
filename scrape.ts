@@ -121,9 +121,15 @@ const scrape = async () => {
     process.exit(1);
   }
 
+  // Intentionally off by one, because the latest will always be a day behind
+  const isCurrent = usage.length == currentDate.getDay();
+
   const readingDate = new Date(firstOfMonth);
   readingDate.setDate(usage.length);
-  console.log(`Reading as of ${readingDate.toLocaleDateString()}`);
+  console.log(
+    `Reading as of ${readingDate.toLocaleDateString()}` +
+      (isCurrent ? "(latest)" : "")
+  );
 
   // Pad out the array with zeroes
   const paddedUsage = Array.from({
@@ -156,6 +162,8 @@ const scrape = async () => {
 
   console.log(plot);
 
+  const lastFive = usage.slice(-5).reverse();
+  const recentMean = stats.mean(lastFive);
   const max = stats.max(usage);
   const min = stats.min(usage);
   const stdDev = stats.standardDeviation(usage);
@@ -163,9 +171,12 @@ const scrape = async () => {
   const table = new AsciiTable();
   table.removeBorder();
   table.addRow("latest", `${usage[usage.length - 1]}`);
+  table.addRow("avg 5 days", recentMean.toFixed(2));
+  table.addRow("avg month", mean.toFixed(2));
   table.addRow("max", max.toFixed(2));
   table.addRow("min", min.toFixed(2));
   table.addRow("stddev", stdDev.toFixed(2));
+  table.addRow("last 5", lastFive.map(x => x.toFixed(2)).join(" "))
 
   console.log(table.toString());
 };
