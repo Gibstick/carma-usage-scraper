@@ -122,7 +122,7 @@ const scrape = async () => {
   }
 
   // Intentionally off by one, because the latest will always be a day behind
-  const isCurrent = usage.length == currentDate.getDay();
+  const isCurrent = usage.length == currentDate.getDate() - 1;
 
   const readingDate = new Date(firstOfMonth);
   readingDate.setDate(usage.length);
@@ -176,7 +176,7 @@ const scrape = async () => {
   table.addRow("max", max.toFixed(2));
   table.addRow("min", min.toFixed(2));
   table.addRow("stddev", stdDev.toFixed(2));
-  table.addRow("last 5", lastFive.map(x => x.toFixed(2)).join(" "))
+  table.addRow("last 5", lastFive.map((x) => x.toFixed(2)).join(" "));
 
   console.log(table.toString());
 };
