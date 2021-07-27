@@ -36,18 +36,20 @@ const SYMBOLS = [
   "│",
 ] as asciichart.PlotConfig["symbols"];
 
-// getCredentials() reads the .env file for credentials.
+// getCredentials() reads credentials from environment variables.
 const getCredentials = () => {
-  const result = dotenv.config();
-  if (result.error) {
-    console.error(result.error);
-    process.exit(1);
-  }
-  assert.ok(process.env.USERNAME);
-  assert.ok(process.env.PASSWORD);
+  assert.ok(process.env.CARMA_USERNAME);
+  assert.ok(process.env.CARMA_PASSWORD);
   return {
-    username: process.env.USERNAME!,
-    password: process.env.PASSWORD!,
+    username: process.env.CARMA_USERNAME!,
+    password: process.env.CARMA_PASSWORD!,
+  };
+};
+
+// getConfig() parses config values from environment variables.
+const getConfig = () => {
+  return {
+    executablePath: process.env.CARMA_CHROME_PATH,
   };
 };
 
@@ -68,9 +70,20 @@ const _doubleUp = <T>(arr: T[]): T[] => {
 };
 
 const scrape = async () => {
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
+  const result = dotenv.config();
+  if (result.error) {
+    console.error(result.error);
+    process.exit(1);
+  }
+
+  const config = getConfig();
   const credentials = getCredentials();
+
+  const launchOptions = config.executablePath
+    ? { ...config, channel: "stable" }
+    : {};
+  const browser = await chromium.launch(launchOptions);
+  const page = await browser.newPage();
 
   page.setDefaultTimeout(DEFAULT_TIMEOUT);
   await page.goto(START_URL);
@@ -131,7 +144,7 @@ const scrape = async () => {
 
   const plotMax = Math.max(...usage, 20);
 
-  const config = {
+  const plotConfig = {
     colors: [asciichart.lightcyan, asciichart.lightyellow],
     min: 0,
     symbols: SYMBOLS,
@@ -139,7 +152,7 @@ const scrape = async () => {
     max: plotMax,
   };
 
-  const plot = asciichart.plot([meanSeries, paddedUsage], config);
+  const plot = asciichart.plot([meanSeries, paddedUsage], plotConfig);
 
   console.log(plot);
 
