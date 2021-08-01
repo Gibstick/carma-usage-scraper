@@ -128,7 +128,7 @@ const scrape = async () => {
   readingDate.setDate(usage.length);
   console.log(
     `Reading as of ${readingDate.toLocaleDateString()}` +
-      (isCurrent ? "(latest)" : "")
+      (isCurrent ? " (latest)" : "")
   );
 
   // Pad out the array with zeroes
