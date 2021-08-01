@@ -1,6 +1,6 @@
 import assert from "assert";
 
-import { chromium } from "playwright-chromium";
+import { chromium, Page } from "playwright-chromium";
 import dotenv from "dotenv";
 import * as asciichart from "asciichart";
 import * as stats from "simple-statistics";
@@ -9,20 +9,6 @@ import AsciiTable from "ascii-table";
 const START_URL =
   "http://www.carmasmartmetering.com/DirectConsumptionDev/login.aspx";
 const DEFAULT_TIMEOUT = 90000; // things take forever to load
-const DAYS_IN_MONTH = [
-  31,
-  28, // This is just used for padding so it's ok
-  31,
-  30,
-  31,
-  30,
-  31,
-  31,
-  30,
-  31,
-  30,
-  31,
-] as const;
 const SYMBOLS = [
   "┼",
   "┤",
@@ -54,12 +40,20 @@ const getConfig = () => {
 };
 
 // getDateSeries() gets a series of dates from startDate going up nDays days ahead.
+// @ts-ignore
 const getDateSeries = (startDate: Date, nDays: number): Date[] => {
   return [...Array(nDays).keys()].map((n) => {
     const date = new Date(startDate);
     date.setDate(n);
     return date;
   });
+};
+
+const getUsageFromPage = async (page: Page): Promise<number[] | undefined> => {
+  const usage: number[] | undefined = await page.evaluate(
+    `chart1.series.find(x => x.name == "Daily Consumption")?.yData.filter(x => x > 0)`
+  );
+  return usage;
 };
 
 // doubleUp() repeats every element in the array, putting duplicates next to
@@ -93,14 +87,25 @@ const scrape = async () => {
   await page.click("#login_btn");
 
   await page.click("#currMonth_btn");
+
+  const lastUsage = await getUsageFromPage(page);
+  if (lastUsage === undefined) {
+    console.error("Unable to find last month's usage");
+    process.exit(1);
+  }
+
   await page.click("#nextMonth_btn");
 
+  // "currentDate" is actually one day behind, because that's the latest data we can have in the chart.
   const currentDate = new Date();
+  currentDate.setDate(currentDate.getDate() - 1);
+
   const firstOfMonth = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
     1
   );
+
   const currentMonthName = currentDate.toLocaleString("en-ca", {
     month: "long",
   });
@@ -111,18 +116,16 @@ const scrape = async () => {
 
   console.log(`Daily Consumption During ${currentMonthName}`);
 
-  let usage: number[] | undefined = await page.evaluate(
-    `chart1.series.find(x => x.name == "Daily Consumption")?.yData.filter(x => x > 0)`
-  );
+  let usage = await getUsageFromPage(page);
 
   await browser.close();
 
   if (usage === undefined) {
+    console.error("Unable to find current month's usage");
     process.exit(1);
   }
 
-  // Intentionally off by one, because the latest will always be a day behind
-  const isCurrent = usage.length == currentDate.getDate() - 1;
+  const isCurrent = usage.length == currentDate.getDate();
 
   const readingDate = new Date(firstOfMonth);
   readingDate.setDate(usage.length);
@@ -131,22 +134,10 @@ const scrape = async () => {
       (isCurrent ? " (latest)" : "")
   );
 
-  // Pad out the array with zeroes
-  const paddedUsage = Array.from({
-    ...usage,
-    length: DAYS_IN_MONTH[firstOfMonth.getMonth()],
-  }).fill(0, usage.length);
+  const last30Usage = [...lastUsage?.slice(30 - usage.length), ...usage];
 
-  const dates = getDateSeries(firstOfMonth, paddedUsage.length);
-
-  const series: [string, number][] = Array(dates.length);
-
-  for (let i = 0; i < series.length; ++i) {
-    series[i] = [dates[i].toISOString(), usage[i]];
-  }
-
-  const mean = stats.mean(usage);
-  const meanSeries = Array(usage.length).fill(mean);
+  const mean = stats.mean(last30Usage);
+  const meanSeries = Array(last30Usage.length).fill(mean);
 
   const plotMax = Math.max(...usage, 20);
 
@@ -158,21 +149,21 @@ const scrape = async () => {
     max: plotMax,
   };
 
-  const plot = asciichart.plot([meanSeries, paddedUsage], plotConfig);
+  const plot = asciichart.plot([meanSeries, last30Usage], plotConfig);
 
   console.log(plot);
 
-  const lastFive = usage.slice(-5).reverse();
+  const lastFive = last30Usage.slice(-5).reverse();
   const recentMean = stats.mean(lastFive);
-  const max = stats.max(usage);
-  const min = stats.min(usage);
-  const stdDev = stats.standardDeviation(usage);
+  const max = stats.max(last30Usage);
+  const min = stats.min(last30Usage);
+  const stdDev = stats.standardDeviation(last30Usage);
 
   const table = new AsciiTable();
   table.removeBorder();
   table.addRow("latest", `${usage[usage.length - 1]}`);
   table.addRow("avg 5 days", recentMean.toFixed(2));
-  table.addRow("avg month", mean.toFixed(2));
+  table.addRow("avg 30 days", mean.toFixed(2));
   table.addRow("max", max.toFixed(2));
   table.addRow("min", min.toFixed(2));
   table.addRow("stddev", stdDev.toFixed(2));
