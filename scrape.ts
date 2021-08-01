@@ -134,7 +134,7 @@ const scrape = async () => {
       (isCurrent ? " (latest)" : "")
   );
 
-  const last30Usage = [...lastUsage?.slice(30 - usage.length), ...usage];
+  const last30Usage = [...lastUsage, ...usage].slice(-30);
 
   const mean = stats.mean(last30Usage);
   const meanSeries = Array(last30Usage.length).fill(mean);
