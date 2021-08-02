@@ -161,7 +161,7 @@ const scrape = async () => {
 
   const table = new AsciiTable();
   table.removeBorder();
-  table.addRow("latest", `${usage[usage.length - 1]}`);
+  table.addRow("latest", `${last30Usage[last30Usage.length - 1]}`);
   table.addRow("avg 5 days", recentMean.toFixed(2));
   table.addRow("avg 30 days", mean.toFixed(2));
   table.addRow("max", max.toFixed(2));
