@@ -64,11 +64,7 @@ const _doubleUp = <T>(arr: T[]): T[] => {
 };
 
 const scrape = async () => {
-  const result = dotenv.config();
-  if (result.error) {
-    console.error(result.error);
-    process.exit(1);
-  }
+  dotenv.config();
 
   const config = getConfig();
   const credentials = getCredentials();
