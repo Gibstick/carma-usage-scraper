@@ -3,17 +3,17 @@
     "scrape": "ts-node scrape.ts"
   },
   "devDependencies": {
-    "@tsconfig/node14": "^1.0.1",
-    "@types/asciichart": "^1.5.6",
-    "@types/node": "^16.3.3",
+    "@tsconfig/node20": "^20.1.4",
+    "@types/asciichart": "^1.5.8",
+    "@types/node": "^20.12.2",
     "ascii-table": "^0.0.9",
     "asciichart": "^1.5.25",
-    "dotenv": "^10.0.0",
+    "dotenv": "^16.4.5",
     "playwright-chromium": "^1.43.1",
-    "prettier": "2.3.2",
+    "prettier": "3.2.5",
     "simple-statistics": "^7.7.0",
     "ts-node": "^10.1.0",
-    "typescript": "^4.3.5"
+    "typescript": "^5.4.5"
   },
   "license": "MPL-2.0"
 }

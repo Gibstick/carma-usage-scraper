@@ -1,5 +1,5 @@
 {
-    "extends": "@tsconfig/node14/tsconfig.json",
+    "extends": "@tsconfig/node20/tsconfig.json",
     "files": [
         "decs.d.ts",
         "scrape.ts"
@@ -9,6 +9,6 @@
         "noUnusedLocals": true
     },
     "ts-node": {
-        "files": true,
+        "files": true
     }
 }
